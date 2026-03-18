@@ -1,0 +1,5 @@
+WIN LOTTERY,You won the lottery!,10000
+CAR_TROUBLE,Your car broke down,-2000
+INHERITANCE,You received an inheritance,25000
+BONUS,Work bonus!,5000
+HOSPITAL,Medical bills,-4000
