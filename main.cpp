@@ -10,7 +10,7 @@ static const int MIN_W = 80;
 static const int MIN_H = 36;
 
 static const int TITLE_W = 80;
-static const int TITLE_H = 2;
+static const int TITLE_H = 8;
 static const int BOARD_W = 80;
 static const int BOARD_H = 28;
 static const int INFO_W = 80;
@@ -493,8 +493,13 @@ static void renderGame(WINDOW* titleWin,
                        const std::string& msg) {
     werase(titleWin);
     if (hasColor) wattron(titleWin, COLOR_PAIR(5));
-    mvwprintw(titleWin, 0, 18, "T H E   G A M E   O F   L I F E");
-    mvwprintw(titleWin, 1, 2, "Early Life -> Split -> College/Career -> Marriage -> Split -> Family/Career -> Retirement");
+    mvwprintw(titleWin, 0, 1,  "  ________       .__       .___                   .__     ");
+    mvwprintw(titleWin, 1, 1,  " /  _____/  ____ |  |    __| _/______ __ __  _____|  |__  ");
+    mvwprintw(titleWin, 2, 1,  "/   \\  ___ /  _ \\|  |   / __ |\\_  __ \\  |  \\/  ___/  |  \\ ");
+    mvwprintw(titleWin, 3, 1,  "\\    \\_\\  (  <_> )  |__/ /_/ | |  | \\/  |  /\\___ \\|   Y  \\");
+    mvwprintw(titleWin, 4, 1,  " \\______  /\\____/|____/\\____ | |__|  |____//____  >___|  /");
+    mvwprintw(titleWin, 5, 1,  "        \\/                  \\/                  \\/     \\/ ");
+    mvwprintw(titleWin, 6, 2,  "Early Life -> Split -> College/Career -> Marriage -> Split -> Family/Career -> Retirement");
     if (hasColor) wattroff(titleWin, COLOR_PAIR(5));
     wrefresh(titleWin);
 
@@ -540,6 +545,48 @@ static void renderGame(WINDOW* titleWin,
     box(msgWin, 0, 0);
     mvwprintw(msgWin, 1, 2, "%s", msg.c_str());
     wrefresh(msgWin);
+}
+
+static bool showStartScreen(bool hasColor) {
+    while (true) {
+        int h, w;
+        getmaxyx(stdscr, h, w);
+        clear();
+        if (hasColor) bkgd(COLOR_PAIR(5));
+
+        const char* lines[] = {
+            "  ________       .__       .___                   .__     ",
+            " /  _____/  ____ |  |    __| _/______ __ __  _____|  |__  ",
+            "/   \\  ___ /  _ \\|  |   / __ |\\_  __ \\  |  \\/  ___/  |  \\ ",
+            "\\    \\_\\  (  <_> )  |__/ /_/ | |  | \\/  |  /\\___ \\|   Y  \\",
+            " \\______  /\\____/|____/\\____ | |__|  |____//____  >___|  /",
+            "        \\/                  \\/                  \\/     \\/ "
+        };
+
+        int artW = 60;
+        int startY = (h / 2) - 6;
+        int startX = (w - artW) / 2;
+        if (startY < 1) startY = 1;
+        if (startX < 0) startX = 0;
+
+        if (hasColor) wattron(stdscr, COLOR_PAIR(8) | A_BOLD);
+        for (int i = 0; i < 6; ++i) {
+            mvprintw(startY + i, startX, "%s", lines[i]);
+        }
+        if (hasColor) wattroff(stdscr, COLOR_PAIR(8) | A_BOLD);
+
+        if (hasColor) wattron(stdscr, COLOR_PAIR(3) | A_BOLD);
+        mvprintw(startY + 8, (w - 8) / 2, "GOLDRUSH");
+        if (hasColor) wattroff(stdscr, COLOR_PAIR(3) | A_BOLD);
+
+        mvprintw(startY + 11, (w - 20) / 2, "S  Start    Q  Quit");
+        refresh();
+
+        int ch = getch();
+        if (ch == 's' || ch == 'S') return true;
+        if (ch == 'q' || ch == 'Q') return false;
+        if (ch == KEY_RESIZE && !ensureMinSize(hasColor)) return false;
+    }
 }
 
 static int playActionCard(WINDOW* parent, const Tile& tile, Player& p, bool hasColor) {
@@ -835,10 +882,16 @@ int main() {
         init_pair(5, COLOR_WHITE, COLOR_BLACK);
         init_pair(6, COLOR_RED, COLOR_BLACK);
         init_pair(7, COLOR_BLUE, COLOR_BLACK);
+        init_pair(8, COLOR_YELLOW, COLOR_BLACK);
         bkgd(COLOR_PAIR(5));
     }
 
     if (!ensureMinSize(hasColor)) {
+        endwin();
+        return 0;
+    }
+
+    if (!showStartScreen(hasColor)) {
         endwin();
         return 0;
     }
