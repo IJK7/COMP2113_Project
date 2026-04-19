@@ -1,4 +1,0 @@
-Cozy Cottage,80000,100000
-Beach House,150000,180000
-City Condo,120000,140000
-Farmhouse,90000,110000

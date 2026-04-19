@@ -1,6 +1,0 @@
-Doctor,8000,60000,Medical degree required
-Artist,3500,45000,No degree needed
-Teacher,4500,55000,College degree
-Athlete,10000,80000,Random events
-Engineer,7500,65000,College degree
-Chef,5000,50000,No degree needed
