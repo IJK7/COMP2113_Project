@@ -1,4 +1,5 @@
 #include "Game.hpp"
+#include "ui.h"
 
 #include <chrono>
 #include <cstdlib>
@@ -27,9 +28,7 @@ Game::~Game() {
 }
 
 void Game::applyWindowBg(WINDOW* w) const {
-    if (w && hasColor) {
-        wbkgd(w, COLOR_PAIR(5));
-    }
+    apply_ui_background(w);
 }
 
 bool Game::ensureMinSize() const {
@@ -43,11 +42,11 @@ bool Game::ensureMinSize() const {
         }
 
         if (hasColor) {
-            bkgd(COLOR_PAIR(5));
+            bkgd(COLOR_PAIR(GOLDRUSH_GOLD_BLACK));
         }
         clear();
         const char* line1 = "Terminal too small - please resize";
-        const char* line2 = "Minimum size: 80x36";
+        const char* line2 = "Minimum size: 116x40";
         const char* line3 = "Press Q to quit";
         int x1 = (w - static_cast<int>(std::strlen(line1))) / 2;
         int x2 = (w - static_cast<int>(std::strlen(line2))) / 2;
@@ -79,7 +78,7 @@ void Game::destroyWindows() {
 void Game::createWindows() {
     int termH, termW;
     getmaxyx(stdscr, termH, termW);
-    int totalH = TITLE_H + BOARD_H + INFO_H + MSG_H;
+    int totalH = TITLE_H + BOARD_H + MSG_H;
     int startY = (termH - totalH) / 2;
     int startX = (termW - TITLE_W) / 2;
     if (startY < 0) startY = 0;
@@ -87,8 +86,8 @@ void Game::createWindows() {
 
     titleWin = newwin(TITLE_H, TITLE_W, startY, startX);
     boardWin = newwin(BOARD_H, BOARD_W, startY + TITLE_H, startX);
-    infoWin = newwin(INFO_H, INFO_W, startY + TITLE_H + BOARD_H, startX);
-    msgWin = newwin(MSG_H, MSG_W, startY + TITLE_H + BOARD_H + INFO_H, startX);
+    infoWin = newwin(INFO_H, INFO_W, startY + TITLE_H, startX + BOARD_W);
+    msgWin = newwin(MSG_H, MSG_W, startY + TITLE_H + BOARD_H, startX);
 
     applyWindowBg(titleWin);
     applyWindowBg(boardWin);
@@ -110,7 +109,7 @@ bool Game::showStartScreen() {
         int h, w;
         getmaxyx(stdscr, h, w);
         clear();
-        if (hasColor) bkgd(COLOR_PAIR(5));
+        if (hasColor) bkgd(COLOR_PAIR(GOLDRUSH_GOLD_BLACK));
 
         const char* lines[] = {
             "  ________       .__       .___                   .__     ",
@@ -127,17 +126,26 @@ bool Game::showStartScreen() {
         if (startY < 1) startY = 1;
         if (startX < 0) startX = 0;
 
-        if (hasColor) wattron(stdscr, COLOR_PAIR(8) | A_BOLD);
+        if (hasColor) attron(COLOR_PAIR(GOLDRUSH_GOLD_BLACK));
+        mvprintw(startY - 1, startX - 4, "╔══════════════════════════════════════════════════════════════════╗");
+        mvprintw(startY + 6, startX - 4, "║                                                                  ║");
+        mvprintw(startY + 7, startX - 4, "╚══════════════════════════════════════════════════════════════════╝");
+        if (hasColor) attroff(COLOR_PAIR(GOLDRUSH_GOLD_BLACK));
+
+        if (hasColor) wattron(stdscr, COLOR_PAIR(GOLDRUSH_GOLD_BLACK) | A_BOLD);
         for (int i = 0; i < 6; ++i) {
             mvprintw(startY + i, startX, "%s", lines[i]);
         }
-        if (hasColor) wattroff(stdscr, COLOR_PAIR(8) | A_BOLD);
+        if (hasColor) wattroff(stdscr, COLOR_PAIR(GOLDRUSH_GOLD_BLACK) | A_BOLD);
 
-        if (hasColor) wattron(stdscr, COLOR_PAIR(3) | A_BOLD);
-        mvprintw(startY + 8, (w - 8) / 2, "GOLDRUSH");
-        if (hasColor) wattroff(stdscr, COLOR_PAIR(3) | A_BOLD);
+        if (hasColor) wattron(stdscr, COLOR_PAIR(GOLDRUSH_GOLD_SAND) | A_BOLD);
+        mvprintw(startY + 9, (w - 8) / 2, "GOLDRUSH");
+        if (hasColor) wattroff(stdscr, COLOR_PAIR(GOLDRUSH_GOLD_SAND) | A_BOLD);
 
-        mvprintw(startY + 11, (w - 20) / 2, "S  Start    Q  Quit");
+        if (hasColor) wattron(stdscr, COLOR_PAIR(GOLDRUSH_BROWN_SAND));
+        mvprintw(startY + 11, (w - 30) / 2, "An Adventure in Text");
+        mvprintw(startY + 13, (w - 20) / 2, "S  Start    Q  Quit");
+        if (hasColor) wattroff(stdscr, COLOR_PAIR(GOLDRUSH_BROWN_SAND));
         refresh();
 
         int ch = getch();
@@ -193,38 +201,16 @@ void Game::setupPlayers() {
 }
 
 void Game::renderHeader() const {
-    werase(titleWin);
-    if (hasColor) wattron(titleWin, COLOR_PAIR(5));
-    mvwprintw(titleWin, 0, 1, "  ________       .__       .___                   .__     ");
-    mvwprintw(titleWin, 1, 1, " /  _____/  ____ |  |    __| _/______ __ __  _____|  |__  ");
-    mvwprintw(titleWin, 2, 1, "/   \\  ___ /  _ \\|  |   / __ |\\_  __ \\  |  \\/  ___/  |  \\ ");
-    mvwprintw(titleWin, 3, 1, "\\    \\_\\  (  <_> )  |__/ /_/ | |  | \\/  |  /\\___ \\|   Y  \\");
-    mvwprintw(titleWin, 4, 1, " \\______  /\\____/|____/\\____ | |__|  |____//____  >___|  /");
-    mvwprintw(titleWin, 5, 1, "        \\/                  \\/                  \\/     \\/ ");
-    mvwprintw(titleWin, 6, 2, "Early Life -> Split -> College/Career -> Marriage -> Split -> Family/Career -> Retirement");
-    if (hasColor) wattroff(titleWin, COLOR_PAIR(5));
-    wrefresh(titleWin);
+    draw_title_banner_ui(titleWin);
 }
 
 void Game::renderGame(int currentPlayer, const std::string& msg) const {
     renderHeader();
-    board.render(boardWin, players, hasColor);
+    draw_board_ui(boardWin, board, players, players[currentPlayer].tile);
 
     const Player& p = players[currentPlayer];
-    werase(infoWin);
-    box(infoWin, 0, 0);
-    if (hasColor) wattron(infoWin, COLOR_PAIR(1 + (currentPlayer % 4)) | A_BOLD);
-    mvwprintw(infoWin, 1, 2, "Player: %s [%c]  Tile: %d  Cash: $%d  Job: %s",
-              p.name.c_str(), p.token, p.tile, p.cash, p.job.c_str());
-    if (hasColor) wattroff(infoWin, COLOR_PAIR(1 + (currentPlayer % 4)) | A_BOLD);
-    mvwprintw(infoWin, 2, 2, "Salary: $%d  Married: %s  Kids: %d  House: %s  [ENTER] Roll  [Q] Quit",
-              p.salary, p.married ? "Yes" : "No", p.kids, p.hasHouse ? "Yes" : "No");
-    wrefresh(infoWin);
-
-    werase(msgWin);
-    box(msgWin, 0, 0);
-    mvwprintw(msgWin, 1, 2, "%s", msg.c_str());
-    wrefresh(msgWin);
+    draw_right_panel_ui(infoWin, p, currentPlayer);
+    draw_message_ui(msgWin, msg, "");
 }
 
 int Game::minRewardForTier(int tier) const {
@@ -276,9 +262,9 @@ int Game::rollSpinner() {
     for (int i = 0; i < 4; ++i) {
         werase(msgWin);
         box(msgWin, 0, 0);
-        if (hasColor) wattron(msgWin, COLOR_PAIR(4));
+        if (hasColor) wattron(msgWin, COLOR_PAIR(GOLDRUSH_BLACK_GOLD));
         mvwprintw(msgWin, 1, 2, "Rolled: %d", value);
-        if (hasColor) wattroff(msgWin, COLOR_PAIR(4));
+        if (hasColor) wattroff(msgWin, COLOR_PAIR(GOLDRUSH_BLACK_GOLD));
         mvwprintw(msgWin, 2, 2, "Press ENTER to confirm");
         wrefresh(msgWin);
         napms(140);
@@ -299,37 +285,12 @@ int Game::showBranchPopup(const std::string& title,
                           const std::vector<std::string>& lines,
                           char a,
                           char b) {
-    int h, w;
-    getmaxyx(stdscr, h, w);
-    WINDOW* popup = newwin(10, 44, (h - 10) / 2, (w - 44) / 2);
-    applyWindowBg(popup);
-    werase(popup);
-    box(popup, 0, 0);
-    if (hasColor) wattron(popup, COLOR_PAIR(4) | A_BOLD);
-    mvwprintw(popup, 1, 2, "%s", title.c_str());
-    if (hasColor) wattroff(popup, COLOR_PAIR(4) | A_BOLD);
-    for (size_t i = 0; i < lines.size(); ++i) {
-        mvwprintw(popup, 3 + static_cast<int>(i), 2, "%s", lines[i].c_str());
-    }
-    mvwprintw(popup, 8, 2, "[%c] or [%c]", a, b);
-    wrefresh(popup);
-
-    int ch;
-    while (true) {
-        ch = wgetch(popup);
-        if (ch == a || ch == a + 32) {
-            delwin(popup);
-            touchwin(msgWin);
-            wrefresh(msgWin);
-            return a;
-        }
-        if (ch == b || ch == b + 32) {
-            delwin(popup);
-            touchwin(msgWin);
-            wrefresh(msgWin);
-            return b;
-        }
-    }
+    (void)a;
+    (void)b;
+    std::vector<int> values;
+    values.push_back(0);
+    values.push_back(1);
+    return choose_branch_with_selector(title, lines, values, 0);
 }
 
 int Game::playActionCard(const Tile& tile, Player& player) {
@@ -367,10 +328,10 @@ int Game::playActionCard(const Tile& tile, Player& player) {
 
         werase(popup);
         box(popup, 0, 0);
-        if (hasColor) wattron(popup, COLOR_PAIR(win ? 3 : 6));
+        if (hasColor) wattron(popup, COLOR_PAIR(win ? GOLDRUSH_GOLD_FOREST : GOLDRUSH_BLACK_TERRA));
         mvwprintw(popup, 1, 2, "The wheel landed on %s!", result == 'R' ? "RED" : "BLACK");
         mvwprintw(popup, 3, 2, "You %s $%d", win ? "WIN" : "LOSE", amount);
-        if (hasColor) wattroff(popup, COLOR_PAIR(win ? 3 : 6));
+        if (hasColor) wattroff(popup, COLOR_PAIR(win ? GOLDRUSH_GOLD_FOREST : GOLDRUSH_BLACK_TERRA));
         mvwprintw(popup, 5, 2, "New cash: $%d", player.cash);
         mvwprintw(popup, 6, 2, "Press ENTER");
         wrefresh(popup);
@@ -407,10 +368,10 @@ int Game::playActionCard(const Tile& tile, Player& player) {
 
         werase(popup);
         box(popup, 0, 0);
-        if (hasColor) wattron(popup, COLOR_PAIR(win ? 3 : 6));
+        if (hasColor) wattron(popup, COLOR_PAIR(win ? GOLDRUSH_GOLD_FOREST : GOLDRUSH_BLACK_TERRA));
         mvwprintw(popup, 1, 2, "Correct answer: %d", answer);
         mvwprintw(popup, 3, 2, "You %s $%d", win ? "WIN" : "LOSE", amount);
-        if (hasColor) wattroff(popup, COLOR_PAIR(win ? 3 : 6));
+        if (hasColor) wattroff(popup, COLOR_PAIR(win ? GOLDRUSH_GOLD_FOREST : GOLDRUSH_BLACK_TERRA));
         mvwprintw(popup, 5, 2, "New cash: $%d", player.cash);
         mvwprintw(popup, 6, 2, "Press ENTER");
         wrefresh(popup);
@@ -438,11 +399,11 @@ int Game::playActionCard(const Tile& tile, Player& player) {
 
         werase(popup);
         box(popup, 0, 0);
-        if (hasColor) wattron(popup, COLOR_PAIR(win ? 3 : 6));
+        if (hasColor) wattron(popup, COLOR_PAIR(win ? GOLDRUSH_GOLD_FOREST : GOLDRUSH_BLACK_TERRA));
         mvwprintw(popup, 1, 2, "Spin: %d", spin);
         mvwprintw(popup, 2, 2, "%s number!", even ? "Even" : "Odd");
         mvwprintw(popup, 3, 2, "You %s $%d", win ? "WIN" : "LOSE", amount);
-        if (hasColor) wattroff(popup, COLOR_PAIR(win ? 3 : 6));
+        if (hasColor) wattroff(popup, COLOR_PAIR(win ? GOLDRUSH_GOLD_FOREST : GOLDRUSH_BLACK_TERRA));
         mvwprintw(popup, 5, 2, "New cash: $%d", player.cash);
         mvwprintw(popup, 6, 2, "Press ENTER");
         wrefresh(popup);
@@ -544,27 +505,23 @@ int Game::chooseNextTile(Player& player, const Tile& tile) {
         int c = showBranchPopup(
             "College or Career?",
             std::vector<std::string>{
-                "A: College",
-                "   Bigger debt now, stronger graduation payoff.",
-                "B: Career",
-                "   Start earning sooner, steadier path."
+                "- College: debt now, stronger graduation payoff",
+                "- Career: income sooner, steadier path"
             },
             'A',
             'B');
-        player.startChoice = (c == 'A') ? 0 : 1;
+        player.startChoice = c;
     }
     if (tile.kind == TILE_SPLIT_FAMILY && tile.id == 58 && player.familyChoice == -1) {
         int c = showBranchPopup(
             "Family or Career?",
             std::vector<std::string>{
-                "A: Family",
-                "   More babies, house chances, more chaos.",
-                "B: Career",
-                "   More payday tiles, promotions, black cards."
+                "- Family: babies, house chances, more chaos",
+                "- Career: more payday tiles and promotions"
             },
             'A',
             'B');
-        player.familyChoice = (c == 'A') ? 0 : 1;
+        player.familyChoice = c;
     }
 
     if (tile.kind == TILE_SPLIT_START) {

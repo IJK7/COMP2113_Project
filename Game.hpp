@@ -15,16 +15,16 @@ public:
     bool run();
 
 private:
-    static const int MIN_W = 80;
-    static const int MIN_H = 36;
-    static const int TITLE_W = 80;
+    static const int MIN_W = 116;
+    static const int MIN_H = 40;
+    static const int TITLE_W = 114;
     static const int TITLE_H = 8;
-    static const int BOARD_W = 80;
+    static const int BOARD_W = 82;
     static const int BOARD_H = 28;
-    static const int INFO_W = 80;
-    static const int INFO_H = 3;
-    static const int MSG_W = 80;
-    static const int MSG_H = 3;
+    static const int INFO_W = 32;
+    static const int INFO_H = 30;
+    static const int MSG_W = 114;
+    static const int MSG_H = 4;
 
     Board board;
     std::vector<Player> players;
