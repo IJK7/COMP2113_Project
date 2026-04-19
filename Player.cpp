@@ -1,19 +1,20 @@
 #include "Player.hpp"
 
-void Player::move(int spaces, int boardSize) {
-    position = (position + spaces) % boardSize;
+char tokenForName(const std::string& name, int index) {
+    if (!name.empty()) {
+        char c = name[0];
+        if (c >= 'a' && c <= 'z') {
+            c = static_cast<char>(c - 'a' + 'A');
+        }
+        return c;
+    }
+    return static_cast<char>('A' + index);
 }
 
-void Player::payday() {
-    cash += salary;
-}
-
-void Player::takeLoan(int amount) {
-    loanAmount += amount;
-    cash += amount;
-}
-
-int Player::calculateNetWorth() const {
-    int stockValue = static_cast<int>(stocks.size()) * 10000;
-    return cash + houseValue + (salary * 5) + stockValue - loanAmount;
+int totalWorth(const Player& player) {
+    int total = player.cash + player.kids * 20000;
+    if (player.hasHouse) {
+        total += player.houseValue;
+    }
+    return total;
 }
