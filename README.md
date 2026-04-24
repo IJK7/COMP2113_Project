@@ -98,7 +98,7 @@ make
 make run
 ```
 
-## 🎮 How to Play
+## 🎮 How to Play (intrustions)
 
 1. Run the game: `./gameoflife`
 2. Enter number of players (1-2)
@@ -148,7 +148,7 @@ This project is for educational purposes. Game of Life is a trademark of Hasbro.
 - Michelle
 - Yin
 - Carla
-- Joy
+- Joylin
 
 ## 🐛 Known Issues
 
