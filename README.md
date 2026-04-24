@@ -157,3 +157,4 @@ This project is for educational purposes. Game of Life is a trademark of Hasbro.
 ---
 
 **Enjoy the game! May the best life win! 🎉**
+
