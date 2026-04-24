@@ -140,7 +140,10 @@ COMP2113_Project/
 
 ## 📝 License
 
-This project is for educational purposes. Game of Life is a trademark of Hasbro.
+This project is for educational purposes. This project is **not affiliated with, endorsed by, or licensed by Hasbro**.  
+All rights to *The Game of Life* board game are owned by Hasbro.  
+
+The code and documentation in this repository are provided solely for learning and non-commercial use.
 
 ## 👥 Contributors
 
